@@ -93,23 +93,26 @@ class MLP(object):
     def relu(self, x):
         # ReLU activation function
         return np.maximum(0, x)
+    
+    def drelu(self, x):
+        # ReLU derivative
+        return 1 * (x > 0)
 
     def softmax(self, x):
         # Softmax activation function
-        e_x = np.exp(x - np.max(x))
+        e_x = np.exp(x)
         return e_x / e_x.sum()
 
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes, whereas this is required
         # at training time.
-        predictions = []
         'Forward Propagation'
         z1 = np.dot(self.W1, X.T) + self.b1
         a1 = self.relu(z1)
         z2 = np.dot(self.W2, a1) + self.b2
-        a2 = self.softmax(z2)
-        return np.argmax(a2, axis=0)
+
+        return np.argmax(z2, axis=0)
 
     def evaluate(self, X, y):
         """
@@ -126,29 +129,36 @@ class MLP(object):
         """
         Dont forget to return the loss of the epoch.
         """
+
+        epsilon = 1e-8
+
         z1 = np.dot(self.W1, X.T) + self.b1
         a1 = self.relu(z1)
-        z2 = np.matmul(self.W2, a1) + self.b2
+        z2 = np.dot(self.W2, a1) + self.b2
+        z2 = z2 - np.max(z2)
         a2 = self.softmax(z2)
+        
+        probabilities = np.exp(z2) / (np.sum(np.exp(z2), axis=0) + epsilon)
+        y_one_hot = np.eye(self.n_classes)[y]
+        dz = probabilities - y_one_hot.T
 
-        # Compute the loss (multinomial logistic loss)
-        epsilon = 1e-8
-        y_one_hot = np.eye(self.n_classes)[y].T
-        loss = -np.sum(y_one_hot * np.log(a2 + epsilon)) / X.shape[0]
+        # Backpropagation
+        dW2 = np.dot(dz, a1.T)
+        db2 = np.sum(dz, axis=1, keepdims=True)
 
-        # Compute the backward pass
-        dz2 = a2 - y_one_hot
-        dW2 = np.dot(dz2, a1.T)
-        db2 = np.sum(dz2, axis=1)
-        dz1 = np.dot(self.W2.T, dz2) * (z1 > 0)
-        dW1 = np.dot(dz1, X)
-        db1 = np.sum(dz1, axis=1, keepdims=True)
+        dz = np.dot(self.W2.T, dz) * self.drelu(z1)
+
+        dW1 = np.dot(dz, X)
+        db1 = np.sum(dz, axis=1, keepdims=True)
 
         # Update weights and biases
         self.W2 -= learning_rate * dW2
-        self.b2 -= learning_rate * db2.reshape(-1, 1)
+        self.b2 -= learning_rate * db2
         self.W1 -= learning_rate * dW1
-        self.b1 -= learning_rate * db1.reshape(-1, 1)
+        self.b1 -= learning_rate * db1
+
+        # Compute the loss (multinomial logistic loss)
+        loss = -np.mean(np.sum(y_one_hot.T * np.log(a2 + epsilon), axis=0))      
 
         return loss
 
