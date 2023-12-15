@@ -111,8 +111,10 @@ class MLP(object):
         z1 = np.dot(self.W1, X.T) + self.b1
         a1 = self.relu(z1)
         z2 = np.dot(self.W2, a1) + self.b2
+        z2 = z2 - np.max(z2)
+        a2 = self.softmax(z2)
 
-        return np.argmax(z2, axis=0)
+        return np.argmax(a2, axis=0)
 
     def evaluate(self, X, y):
         """
