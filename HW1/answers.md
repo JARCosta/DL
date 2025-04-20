@@ -61,6 +61,6 @@ The best validation accuracy was `0.7960` for a learning rate of `0.1` and the w
 Running a batch size of `256` with `150` epochs resulted in a training loss of `0.3164`, a validation accuracy of `0.8428` and a test accuracy of `0.7713`. Since there doesn't seem to be a decrease in validation accuracy in favor of a increase in test accuracy, there doesn't seem to be overfitting.
 Setting L2 regularization to `0.0001` yelded the best validation accuracy of `0.8444` and having a dropout probability of `0.2` got the worst validation accuracy of `0.8342`. Having the graphs:
 
-![Train loss and validation loss of MLP for best validation accuracy with L2 regularization](./images/torch_mlp_train_valid_loss_l2.png)
+![Train loss and validation loss of MLP for best validation accuracy with L2 regularization](./images/torch_train_valid_loss_l2.png)
 
-![Train loss and validation loss of MLP for worst validation accuracy with dropout](./images/torch_mlp_train_valid_loss_dropout.png)
+![Train loss and validation loss of MLP for worst validation accuracy with dropout](./images/torch_train_valid_loss_dropout.png)
